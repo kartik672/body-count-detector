@@ -381,9 +381,15 @@
         <div class="video-overlay"></div>
     </div>
     
+    <!-- Background Audio -->
+    <audio autoplay loop id="bgAudio">
+        <source src="merewalasardar.mp3" type="audio/mpeg">
+        Your browser does not support the audio tag.
+    </audio>
+    
    
     <div class="video-controls">
-        <button class="video-toggle" id="videoToggle">
+        <button class="video-toggle" id="videoToggle" title="Toggle background music">
             <span id="videoIcon">🔇</span>
         </button>
     </div>
@@ -516,16 +522,23 @@
             
         
             const bgVideo = document.getElementById('bgVideo');
+            const bgAudio = document.getElementById('bgAudio');
             const videoToggle = document.getElementById('videoToggle');
             const videoIcon = document.getElementById('videoIcon');
             
-          
+            // Keep video permanently muted
+            bgVideo.muted = true;
+            
+            // Start with audio muted initially
+            bgAudio.muted = true;
+            
+            // Control audio instead of video
             videoToggle.addEventListener('click', function() {
-                if (bgVideo.muted) {
-                    bgVideo.muted = false;
+                if (bgAudio.muted) {
+                    bgAudio.muted = false;
                     videoIcon.textContent = '🔊';
                 } else {
-                    bgVideo.muted = true;
+                    bgAudio.muted = true;
                     videoIcon.textContent = '🔇';
                 }
             });
