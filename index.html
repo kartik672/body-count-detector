@@ -479,7 +479,7 @@
             </form>
             
             <div id="resultSection" class="result-section">
-                <h2 class="result-title">Your Level Count Result</h2>
+                <h2 class="result-title">Your Body Count Result</h2>
                 <div id="levelCount" class="level-count">0</div>
                 <p id="levelDescription" class="level-description"></p>
                 
@@ -667,7 +667,7 @@
             
             shareWhatsApp.addEventListener('click', function() {
                 const level = levelCount.textContent;
-                const text = `My Level Count is ${level}! Find out yours at this fun interactive app!`;
+                const text = `My Body Count is ${level}! Find out yours at this body count detector🤤🤤🤤!`;
                 const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
                 window.open(url, '_blank');
             });
