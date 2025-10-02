@@ -76,7 +76,7 @@
             border-radius: 20px;
             box-shadow: var(--shadow);
             overflow: hidden;
-            margin-bottom: 2rem;
+            margin: 0 auto 2rem auto;
             animation: fadeIn 0.8s ease-out;
             backdrop-filter: blur(2px);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -741,48 +741,25 @@
         });
     </script>
 
-    <!-- Text Section with White Background -->
-    <div class="text-section">
-        <div class="text-content">
-            <p>Are hana yawr 😊 bhai, Tilak Verma better than Virat Kohli,</p>
-            <p>😊 chal ab tu mere aand (वृषण) 🎀 khujlana band kr 😨</p>
+    <!-- Independent Text Sections with inline styles (won't affect main form) -->
+    
+    <!-- First Text Section -->
+    <div style="width: 100vw; height: 100vh; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; margin: 0; padding: 2rem; box-sizing: border-box;">
+        <div style="background: white; padding: 2rem 3rem; border-radius: 15px; text-align: center; max-width: 80%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Are hana yawr 😊 bhai, Tilak Verma better than Virat Kohli,</p>
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">😊 chal ab tu mere aand (वृषण) 🎀 khujlana band kr 😨</p>
         </div>
     </div>
 
-    <style>
-        .text-section {
-            width: 100%;
-            background: white;
-            padding: 3rem 2rem;
-            margin-top: 2rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        .text-content {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .text-content p {
-            font-size: 1.5rem;
-            color: black;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            line-height: 1.6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        @media (max-width: 768px) {
-            .text-content p {
-                font-size: 1.2rem;
-            }
-            
-            .text-section {
-                padding: 2rem 1rem;
-            }
-        }
-    </style>
+    <!-- Second Text Section -->
+    <div style="width: 100vw; height: 100vh; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; margin: 0; padding: 2rem; box-sizing: border-box;">
+        <div style="background: white; padding: 2rem 3rem; border-radius: 15px; text-align: center; max-width: 80%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Ohh axha betu ji 🤔 awpki chumth</p>
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">😊 pr chiti🎀 ne kat liya tha ess</p>
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">liye khujlate😨 khujlate chumth</p>
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">ka chandigarh😍 ban gya it's okay</p>
+            <p style="font-size: 2rem; color: black; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">yawr😘 me samj sakta hu 🎀</p>
+        </div>
+    </div>
 </body>
 </html>
