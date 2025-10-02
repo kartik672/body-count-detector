@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Count Detector</title>
+    <style>
+        :root {
+            --primary: #ff4d94;
+            --secondary: #6a11cb;
+            --accent: #ff9a3d;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            color: var(--dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease-out;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        header {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: pulse 4s infinite;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        h2 i {
+            margin-right: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5ee;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 77, 148, 0.2);
+            background: white;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .result-section {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(248, 249, 250, 0.75) 0%, rgba(233, 236, 239, 0.75) 100%);
+            border-radius: 15px;
+            margin-top: 2rem;
+            display: none;
+            animation: fadeIn 0.8s ease-out;
+            backdrop-filter: blur(6px);
+        }
+
+        .result-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .level-count {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 1rem 0;
+            animation: pulse 2s infinite;
+        }
+
+        .level-description {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .share-btn {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .share-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .reset-btn {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--dark);
+            margin-top: 1rem;
+        }
+
+        .reset-btn:hover {
+            background: var(--dark);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            top: 0;
+            opacity: 0;
+            z-index: 100;
+        }
+
+            @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .level-count {
+                font-size: 3rem;
+            }
+            
+            .share-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .share-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .container {
+                background: rgba(255, 255, 255, 0.75);
+            }
+        }        .emoji {
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+        }
+        
+        .relationship-duration {
+            display: none;
+        }
+        
+        .video-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+        
+        .video-toggle {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+        
+        .video-toggle:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+   
+    <div class="video-background">
+        <video autoplay muted loop id="bgVideo">
+            <source src="WhatsApp Video 2025-10-02 at 12.08.16_0dc3d843.mp4" type="video/mp4">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-background-with-moving-lines-1765-large.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+    
+   
+    <div class="video-controls">
+        <button class="video-toggle" id="videoToggle">
+            <span id="videoIcon">🔇</span>
+        </button>
+    </div>
+
+    
+    <div class="container">
+        <header>
+            <h1>Body Count Detector</h1>
+            <p class="subtitle">Created by Kartikeya Ruhela</p>
+        </header>
+        
+        <div class="content">
+            <form id="levelForm">
+                <div class="form-section">
+                    <h2><i>👤</i> Personal Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" min="18" max="100" placeholder="Enter your age" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="education">Highest Education</label>
+                        <select id="education">
+                            <option value="none">None</option>
+                            <option value="highschool">High School</option>
+                            <option value="bachelor">Bachelor's Degree</option>
+                            <option value="btech">B.Tech</option>
+                            <option value="mtech">M.Tech</option>
+                            <option value="mba">MBA</option>
+                            <option value="phd">PhD</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="placesLived">List of all places you've lived (cities or towns)</label>
+                        <textarea id="placesLived" placeholder="Enter each place separated by commas" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2><i>💖</i> Relationship Status</h2>
+                    
+                    <div class="form-group">
+                        <label for="boyfriendStatus">Current boyfriend status</label>
+                        <select id="boyfriendStatus">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                            <option value="name">Yes, and I'll share the name</option>
+                        </select>
+                    </div>
+                    
+                    <div id="boyfriendNameGroup" class="form-group" style="display: none;">
+                        <label for="boyfriendName">Boyfriend's Name</label>
+                        <input type="text" id="boyfriendName" placeholder="Enter boyfriend's name">
+                    </div>
+                    
+                    <div id="relationshipDurationGroup" class="form-group relationship-duration">
+                        <label for="relationshipDuration">Relationship Duration (in months)</label>
+                        <input type="number" id="relationshipDuration" min="0" max="120" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="exCount">Number of past romantic partners (exes)</label>
+                        <input type="number" id="exCount" min="0" max="100" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maleFriends">Number of close male friends (non-romantic)</label>
+                        <input type="number" id="maleFriends" min="0" max="100" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maleBFFs">Number of male best friends (Male BFFs)</label>
+                        <input type="number" id="maleBFFs" min="0" max="100" value="0">
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="hasCrush">
+                        <label for="hasCrush">I currently have a crush</label>
+                    </div>
+                </div>
+                
+                <button type="button" id="calculateBtn" class="btn">
+                    <i>🔍</i> Calculate My Level Count
+                </button>
+            </form>
+            
+            <div id="resultSection" class="result-section">
+                <h2 class="result-title">Your Level Count Result</h2>
+                <div id="levelCount" class="level-count">0</div>
+                <p id="levelDescription" class="level-description"></p>
+                
+                <div class="share-buttons">
+                    <button class="share-btn" id="shareTwitter">
+                        <i></i> Share on Twitter
+                    </button>
+                    <button class="share-btn" id="shareWhatsApp">
+                        <i>💬</i> Share on WhatsApp
+                    </button>
+                </div>
+                
+                <button class="btn reset-btn" id="resetBtn">
+                    <i>🔄</i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          
+            const levelForm = document.getElementById('levelForm');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultSection = document.getElementById('resultSection');
+            const levelCount = document.getElementById('levelCount');
+            const levelDescription = document.getElementById('levelDescription');
+            const resetBtn = document.getElementById('resetBtn');
+            const shareTwitter = document.getElementById('shareTwitter');
+            const shareWhatsApp = document.getElementById('shareWhatsApp');
+            const boyfriendStatus = document.getElementById('boyfriendStatus');
+            const boyfriendNameGroup = document.getElementById('boyfriendNameGroup');
+            const relationshipDurationGroup = document.querySelector('.relationship-duration');
+            
+        
+            const bgVideo = document.getElementById('bgVideo');
+            const videoToggle = document.getElementById('videoToggle');
+            const videoIcon = document.getElementById('videoIcon');
+            
+          
+            videoToggle.addEventListener('click', function() {
+                if (bgVideo.muted) {
+                    bgVideo.muted = false;
+                    videoIcon.textContent = '🔊';
+                } else {
+                    bgVideo.muted = true;
+                    videoIcon.textContent = '🔇';
+                }
+            });
+            
+            
+            boyfriendStatus.addEventListener('change', function() {
+                if (this.value === 'name') {
+                    boyfriendNameGroup.style.display = 'block';
+                    relationshipDurationGroup.style.display = 'block';
+                } else if (this.value === 'yes') {
+                    boyfriendNameGroup.style.display = 'none';
+                    relationshipDurationGroup.style.display = 'block';
+                } else {
+                    boyfriendNameGroup.style.display = 'none';
+                    relationshipDurationGroup.style.display = 'none';
+                }
+            });
+            
+           
+            calculateBtn.addEventListener('click', function() {
+              
+                const fullName = document.getElementById('fullName').value;
+                const age = parseInt(document.getElementById('age').value);
+                const education = document.getElementById('education').value;
+                const placesLived = document.getElementById('placesLived').value;
+                const exCount = parseInt(document.getElementById('exCount').value);
+                const maleFriends = parseInt(document.getElementById('maleFriends').value);
+                const maleBFFs = parseInt(document.getElementById('maleBFFs').value);
+                const hasCrush = document.getElementById('hasCrush').checked;
+                const relationshipDuration = parseInt(document.getElementById('relationshipDuration').value) || 0;
+                
+                
+                let totalScore = 0;
+                
+               
+                totalScore += exCount * 2;
+                
+               
+                totalScore += maleBFFs * 1;
+                
+                
+                if (hasCrush) {
+                    totalScore += 1;
+                }
+                
+                const placesArray = placesLived.split(',').filter(place => place.trim() !== '');
+                if (placesArray.length >= 5) {
+                    totalScore += 1;
+                }
+                
+                
+                const specialCities = ['delhi', 'mumbai', 'pune', 'noida', 'ghaziabad', 'ncr'];
+                let hasSpecialCity = false;
+                
+                placesArray.forEach(place => {
+                    if (specialCities.includes(place.trim().toLowerCase())) {
+                        hasSpecialCity = true;
+                    }
+                });
+                
+                if (hasSpecialCity) {
+                    totalScore += 20;
+                }
+                
+              
+                const highValueDegrees = ['btech', 'mtech', 'mba'];
+                if (highValueDegrees.includes(education)) {
+                    totalScore += 15;
+                }
+                
+               
+                if (age >= 25) {
+                    totalScore += 1;
+                }
+                
+                
+                const maleFriendsScore = Math.min(maleFriends * 0.5, 5);
+                totalScore += maleFriendsScore;
+                
+               
+                totalScore += relationshipDuration * 10;
+                
+               
+                totalScore = Math.round(totalScore);
+                
+               
+                resultSection.style.display = 'block';
+                
+               
+                animateValue(levelCount, 0, totalScore, 1500);
+                
+                
+                let description = '';
+                let emoji = '';
+                
+                if (totalScore <= 5) {
+                    description = "You're just getting started! Your love journey has barely begun.";
+                    emoji = "🌱";
+                } else if (totalScore <= 10) {
+                    description = "You've had some experiences but there's still plenty to explore!😋😋😍";
+                    emoji = "";
+                } else if (totalScore <= 15) {
+                    description = "You're quite experienced in the world of babu shona!😁😋😘";
+                    emoji = "🔥";
+                } else if (totalScore <= 20) {
+                    description = "Wow, you're a babu shona expert with plenty of stories to tell!";
+                    emoji = "🌟";
+                } else if (totalScore <= 50) {
+                    description = "You're a legendary sex master! Your experience is impressive.💕🤤🤤";
+                    emoji = "👑";
+                } else {
+                    description = "You're an absolute sex guru! Your body count is off the charts!☠🤤💀";
+                    emoji = "🚀";
+                }
+                
+                levelDescription.textContent = description + " " + emoji;
+            
+                createConfetti();
+                
+                
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            
+            resetBtn.addEventListener('click', function() {
+                levelForm.reset();
+                resultSection.style.display = 'none';
+                boyfriendNameGroup.style.display = 'none';
+                relationshipDurationGroup.style.display = 'none';
+            });
+            
+           
+            shareTwitter.addEventListener('click', function() {
+                const level = levelCount.textContent;
+                const text = `My Level Count is ${level}! Find out yours at this fun interactive app!`;
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                window.open(url, '_blank');
+            });
+            
+            shareWhatsApp.addEventListener('click', function() {
+                const level = levelCount.textContent;
+                const text = `My Level Count is ${level}! Find out yours at this fun interactive app!`;
+                const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+                window.open(url, '_blank');
+            });
+            
+           
+            function animateValue(element, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const value = Math.floor(progress * (end - start) + start);
+                    element.textContent = value;
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+            
+           
+            function createConfetti() {
+                const colors = ['#ff4d94', '#6a11cb', '#ff9a3d', '#2575fc', '#28a745'];
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = Math.random() * 10 + 5 + 'px';
+                    confetti.style.height = Math.random() * 10 + 5 + 'px';
+                    confetti.style.animation = `confetti ${Math.random() * 3 + 2}s linear forwards`;
+                    document.body.appendChild(confetti);
+                    
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
