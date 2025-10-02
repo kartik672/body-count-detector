@@ -382,14 +382,15 @@
     </div>
     
     <!-- Background Audio -->
-    <audio autoplay loop id="bgAudio">
+    <audio loop id="bgAudio" preload="auto">
         <source src="merewalasardar.mp3" type="audio/mpeg">
+        <source src="merewalasardar.mp3" type="audio/mp3">
         Your browser does not support the audio tag.
     </audio>
     
    
     <div class="video-controls">
-        <button class="video-toggle" id="videoToggle" title="Toggle background music">
+        <button class="video-toggle" id="videoToggle" title="Click to play/pause background music">
             <span id="videoIcon">🔇</span>
         </button>
     </div>
@@ -529,19 +530,63 @@
             // Keep video permanently muted
             bgVideo.muted = true;
             
-            // Start with audio muted initially
-            bgAudio.muted = true;
+            // Audio control variables
+            let audioPlaying = false;
             
-            // Control audio instead of video
-            videoToggle.addEventListener('click', function() {
-                if (bgAudio.muted) {
-                    bgAudio.muted = false;
+            // Function to play audio
+            function playAudio() {
+                bgAudio.play().then(() => {
+                    audioPlaying = true;
                     videoIcon.textContent = '🔊';
-                } else {
-                    bgAudio.muted = true;
+                }).catch(error => {
+                    console.log('Audio play failed:', error);
+                    audioPlaying = false;
                     videoIcon.textContent = '🔇';
+                });
+            }
+            
+            // Function to pause audio
+            function pauseAudio() {
+                bgAudio.pause();
+                audioPlaying = false;
+                videoIcon.textContent = '�';
+            }
+            
+            // Try to start audio automatically (might be blocked by browser)
+            document.addEventListener('click', function startAudioOnFirstClick() {
+                if (!audioPlaying) {
+                    playAudio();
+                }
+                document.removeEventListener('click', startAudioOnFirstClick);
+            }, { once: true });
+            
+            // Control audio playback
+            videoToggle.addEventListener('click', function() {
+                if (audioPlaying) {
+                    pauseAudio();
+                } else {
+                    playAudio();
                 }
             });
+            
+            // Set initial icon state
+            videoIcon.textContent = '🔇';
+            
+            // Audio event listeners
+            bgAudio.addEventListener('loadeddata', function() {
+                console.log('Audio loaded successfully');
+            });
+            
+            bgAudio.addEventListener('error', function(e) {
+                console.error('Audio error:', e);
+            });
+            
+            bgAudio.addEventListener('canplaythrough', function() {
+                console.log('Audio can play through');
+            });
+            
+            // Set audio volume
+            bgAudio.volume = 0.7; // Set to 70% volume
             
             
             boyfriendStatus.addEventListener('change', function() {
