@@ -14,7 +14,11 @@
             --success: #28a745;
             --warning: #ffc107;
             --danger: #dc3545;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 6px rgba            // Start audio when page loads
+            window.addEventListener('load', startAudio);
+            
+            // Also try to start immediately
+            startAudio(); 0, 0.1);
             --transition: all 0.3s ease;
         }
 
@@ -342,32 +346,6 @@
         .relationship-duration {
             display: none;
         }
-        
-        .video-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10;
-        }
-        
-        .video-toggle {
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: var(--transition);
-        }
-        
-        .video-toggle:hover {
-            background: white;
-            transform: scale(1.1);
-        }
     </style>
 </head>
 <body>
@@ -382,20 +360,13 @@
     </div>
     
     <!-- Background Audio -->
-    <audio loop id="bgAudio" preload="auto">
+    <audio autoplay loop id="bgAudio" preload="auto" muted>
         <source src="merewalasardar.mp3" type="audio/mpeg">
         <source src="merewalasardar.mp3" type="audio/mp3">
         Your browser does not support the audio tag.
     </audio>
     
-   
-    <div class="video-controls">
-        <button class="video-toggle" id="videoToggle" title="Click to play/pause background music">
-            <span id="videoIcon">🔇</span>
-        </button>
-    </div>
 
-    
     <div class="container">
         <header>
             <h1>Body Count Detector</h1>
@@ -524,24 +495,22 @@
         
             const bgVideo = document.getElementById('bgVideo');
             const bgAudio = document.getElementById('bgAudio');
-            const videoToggle = document.getElementById('videoToggle');
-            const videoIcon = document.getElementById('videoIcon');
             
             // Keep video permanently muted
             bgVideo.muted = true;
             
-            // Audio control variables
-            let audioPlaying = false;
-            
-            // Function to play audio
-            function playAudio() {
+            // Function to start audio automatically
+            function startAudio() {
+                bgAudio.muted = false;
                 bgAudio.play().then(() => {
-                    audioPlaying = true;
-                    videoIcon.textContent = '🔊';
+                    console.log('Audio started successfully');
                 }).catch(error => {
-                    console.log('Audio play failed:', error);
-                    audioPlaying = false;
-                    videoIcon.textContent = '🔇';
+                    console.log('Initial autoplay failed, trying on user interaction:', error);
+                    // If autoplay fails, try again on first user interaction
+                    document.addEventListener('click', function() {
+                        bgAudio.muted = false;
+                        bgAudio.play().catch(e => console.log('Audio play failed:', e));
+                    }, { once: true });
                 });
             }
             
@@ -552,27 +521,12 @@
                 videoIcon.textContent = '�';
             }
             
-            // Try to start audio automatically (might be blocked by browser)
-            document.addEventListener('click', function startAudioOnFirstClick() {
-                if (!audioPlaying) {
-                    playAudio();
-                }
-                document.removeEventListener('click', startAudioOnFirstClick);
-            }, { once: true });
+
             
-            // Control audio playback
-            videoToggle.addEventListener('click', function() {
-                if (audioPlaying) {
-                    pauseAudio();
-                } else {
-                    playAudio();
-                }
-            });
+            // Set audio volume
+            bgAudio.volume = 0.7; // Set to 70% volume
             
-            // Set initial icon state
-            videoIcon.textContent = '🔇';
-            
-            // Audio event listeners
+            // Audio event listeners for debugging
             bgAudio.addEventListener('loadeddata', function() {
                 console.log('Audio loaded successfully');
             });
@@ -583,10 +537,20 @@
             
             bgAudio.addEventListener('canplaythrough', function() {
                 console.log('Audio can play through');
+                // Try to play again when audio is ready
+                if (bgAudio.paused) {
+                    bgAudio.muted = false;
+                    bgAudio.play().catch(e => console.log('Canplaythrough play failed:', e));
+                }
             });
             
-            // Set audio volume
-            bgAudio.volume = 0.7; // Set to 70% volume
+            bgAudio.addEventListener('play', function() {
+                console.log('Audio is now playing');
+            });
+            
+            bgAudio.addEventListener('pause', function() {
+                console.log('Audio is paused');
+            });
             
             
             boyfriendStatus.addEventListener('change', function() {
