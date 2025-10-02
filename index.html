@@ -14,11 +14,9 @@
             --success: #28a745;
             --warning: #ffc107;
             --danger: #dc3545;
-            --shadow: 0 4px 6px rgba            // Start audio when page loads
-            window.addEventListener('load', startAudio);
+            --shadow: 0 4px 6px rg            }
             
-            // Also try to start immediately
-            startAudio(); 0, 0.1);
+            // Set audio volume0.1);
             --transition: all 0.3s ease;
         }
 
@@ -360,7 +358,7 @@
     </div>
     
     <!-- Background Audio -->
-    <audio autoplay loop id="bgAudio" preload="auto" muted>
+    <audio id="bgAudio" preload="auto" loop>
         <source src="merewalasardar.mp3" type="audio/mpeg">
         <source src="merewalasardar.mp3" type="audio/mp3">
         Your browser does not support the audio tag.
@@ -501,17 +499,34 @@
             
             // Function to start audio automatically
             function startAudio() {
+                console.log('Attempting to start audio...');
+                bgAudio.currentTime = 0;
                 bgAudio.muted = false;
-                bgAudio.play().then(() => {
-                    console.log('Audio started successfully');
-                }).catch(error => {
-                    console.log('Initial autoplay failed, trying on user interaction:', error);
-                    // If autoplay fails, try again on first user interaction
-                    document.addEventListener('click', function() {
-                        bgAudio.muted = false;
-                        bgAudio.play().catch(e => console.log('Audio play failed:', e));
-                    }, { once: true });
-                });
+                
+                const playPromise = bgAudio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('Audio started successfully');
+                    }).catch(error => {
+                        console.log('Autoplay failed, will try on user interaction:', error);
+                        // Add click event listener to start audio on first interaction
+                        const startOnClick = function() {
+                            console.log('Starting audio on user click...');
+                            bgAudio.muted = false;
+                            bgAudio.play().then(() => {
+                                console.log('Audio started after user interaction');
+                            }).catch(e => {
+                                console.log('Audio play failed even after user interaction:', e);
+                            });
+                            document.removeEventListener('click', startOnClick);
+                            document.removeEventListener('touchstart', startOnClick);
+                        };
+                        
+                        document.addEventListener('click', startOnClick);
+                        document.addEventListener('touchstart', startOnClick);
+                    });
+                }
             }
             
             // Function to pause audio
@@ -525,6 +540,12 @@
             
             // Set audio volume
             bgAudio.volume = 0.7; // Set to 70% volume
+            
+            // Start audio when page loads
+            window.addEventListener('load', startAudio);
+            
+            // Also try to start immediately
+            setTimeout(startAudio, 100);
             
             // Audio event listeners for debugging
             bgAudio.addEventListener('loadeddata', function() {
